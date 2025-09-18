@@ -1,0 +1,10 @@
+{
+  "strategy_id": "strategy_1758099792205",
+  "name": "测试策略_1758099792",
+  "code": "def strategy(df):\n    # 简单双均线策略\n    df['MA5'] = df['close'].rolling(window=5).mean()\n    df['MA20'] = df['close'].rolling(window=20).mean()\n    df['signal'] = 0\n    df['signal'][5:] = np.where(df['MA5'][5:] > df['MA20'][5:], 1, 0)\n    df['position'] = df['signal'].diff()\n    return df",
+  "parameters": {},
+  "metadata": {},
+  "description": "这是一个用于测试策略保存功能的测试策略",
+  "create_time": "2025-09-17T17:03:12.209841",
+  "type": "custom"
+}

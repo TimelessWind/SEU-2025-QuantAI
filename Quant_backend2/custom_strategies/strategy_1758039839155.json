@@ -1,0 +1,36 @@
+{
+  "strategy_id": "strategy_1758039839155",
+  "name": "测试优化策略_1758039838",
+  "code": "\n# 双均线策略测试\n# 参数: short_period, long_period, buy_threshold, sell_threshold\n\n# 计算移动平均线\ndf['ma_short'] = df['close_price'].rolling(window=short_period).mean()\ndf['ma_long'] = df['close_price'].rolling(window=long_period).mean()\n\n# 计算价格与均线的比率\ndf['price_ma_ratio'] = df['close_price'] / df['ma_short']\n\n# 生成交易信号\nfor i in range(1, len(df)):\n    # 买入信号：价格上穿短期均线且超过阈值\n    if (df.loc[i, 'price_ma_ratio'] >= buy_threshold and \n        df.loc[i-1, 'price_ma_ratio'] < buy_threshold):\n        df.loc[i, 'signal'] = 1  # 买入\n        df.loc[i, 'position'] = 1\n    \n    # 卖出信号：价格下穿短期均线\n    elif (df.loc[i, 'price_ma_ratio'] <= sell_threshold and \n          df.loc[i-1, 'price_ma_ratio'] > sell_threshold):\n        df.loc[i, 'signal'] = -1  # 卖出\n        df.loc[i, 'position'] = 0\n    \n    # 保持仓位\n    else:\n        df.loc[i, 'position'] = df.loc[i-1, 'position']\n",
+  "parameters": {
+    "short_period": 5,
+    "long_period": 20,
+    "buy_threshold": 1.01,
+    "sell_threshold": 1.0
+  },
+  "metadata": {
+    "short_period": {
+      "type": "int",
+      "description": "",
+      "default": 5
+    },
+    "long_period": {
+      "type": "int",
+      "description": "",
+      "default": 20
+    },
+    "buy_threshold": {
+      "type": "float",
+      "description": "",
+      "default": 1.01
+    },
+    "sell_threshold": {
+      "type": "float",
+      "description": "",
+      "default": 1.0
+    }
+  },
+  "description": "这是一个用于测试优化后策略保存逻辑的双均线策略测试案例",
+  "create_time": "2025-09-17T00:23:59.173718",
+  "type": "custom"
+}

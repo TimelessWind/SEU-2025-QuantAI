@@ -1,0 +1,642 @@
+{
+  "report_time": "2025-09-11 15:44:22",
+  "token_status": "有效",
+  "database_status": "连接失败",
+  "api_summary": {
+    "total_categories": 11,
+    "total_apis": 79,
+    "available_apis": 50
+  },
+  "api_categories": {
+    "股票数据": {
+      "name": "股票数据",
+      "total_apis": 22,
+      "available_apis": 17,
+      "apis": [
+        {
+          "api": "stock_basic",
+          "name": "股票列表",
+          "points_required": 120,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "daily",
+          "name": "日线行情",
+          "points_required": 120,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "weekly",
+          "name": "周线行情",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "monthly",
+          "name": "月线行情",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "daily_basic",
+          "name": "每日指标数据",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "new_share",
+          "name": "IPO新股列表",
+          "points_required": 120,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "top_list",
+          "name": "龙虎榜每日明细",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "top_inst",
+          "name": "龙虎榜机构交易明细",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "pledge_detail",
+          "name": "股权质押明细",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "pledge_stat",
+          "name": "股权质押统计",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "margin",
+          "name": "融资融券交易汇总",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "margin_detail",
+          "name": "融资融券交易明细",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "repurchase",
+          "name": "股票回购",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "concept",
+          "name": "概念股行情",
+          "points_required": 5000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "concept_detail",
+          "name": "概念股列表",
+          "points_required": 5000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "share_float",
+          "name": "限售股解禁",
+          "points_required": 3000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "block_trade",
+          "name": "大宗交易",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "stk_holdernumber",
+          "name": "股东人数",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "moneyflow",
+          "name": "个股资金流向",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "stk_holdertrade",
+          "name": "股东增减持",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "stk_limit",
+          "name": "每日涨跌停价格",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "hk_hold",
+          "name": "沪深股通持股明细",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        }
+      ]
+    },
+    "财务数据": {
+      "name": "财务数据",
+      "total_apis": 10,
+      "available_apis": 5,
+      "apis": [
+        {
+          "api": "income",
+          "name": "利润表",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "balancesheet",
+          "name": "资产负债表",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "cashflow",
+          "name": "现金流量表",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "forecast",
+          "name": "业绩预告",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "express",
+          "name": "业绩快报",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "dividend",
+          "name": "分红送股",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "fina_indicator",
+          "name": "财务指标数据",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "fina_audit",
+          "name": "财务审计意见",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "fina_mainbz",
+          "name": "主营业务构成",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "disclosure_date",
+          "name": "财报披露计划",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        }
+      ]
+    },
+    "基金数据": {
+      "name": "基金数据",
+      "total_apis": 7,
+      "available_apis": 4,
+      "apis": [
+        {
+          "api": "fund_basic",
+          "name": "公募基金列表",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "fund_company",
+          "name": "公募基金公司",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "fund_nav",
+          "name": "公募基金净值",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "fund_daily",
+          "name": "场内基金日线行情",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "fund_div",
+          "name": "公募基金分红",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "fund_portfolio",
+          "name": "公募基金持仓数据",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "fund_adj",
+          "name": "基金复权因子",
+          "points_required": 5000,
+          "status": "可用",
+          "call_status": true
+        }
+      ]
+    },
+    "期货数据": {
+      "name": "期货数据",
+      "total_apis": 7,
+      "available_apis": 3,
+      "apis": [
+        {
+          "api": "fut_basic",
+          "name": "期货合约列表",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "trade_cal",
+          "name": "期货交易日历",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "fut_daily",
+          "name": "期货日线行情",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "fut_holding",
+          "name": "每日成交持仓排名",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "fut_wsr",
+          "name": "仓单日报",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "fut_settle",
+          "name": "结算参数",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "index_daily",
+          "name": "南华期货指数行情",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        }
+      ]
+    },
+    "期权数据": {
+      "name": "期权数据",
+      "total_apis": 2,
+      "available_apis": 2,
+      "apis": [
+        {
+          "api": "opt_basic",
+          "name": "期权合约列表",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "opt_daily",
+          "name": "期权日线行情",
+          "points_required": 5000,
+          "status": "可用",
+          "call_status": true
+        }
+      ]
+    },
+    "债券数据": {
+      "name": "债券数据",
+      "total_apis": 3,
+      "available_apis": 3,
+      "apis": [
+        {
+          "api": "cb_basic",
+          "name": "可转债基础信息",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "cb_issue",
+          "name": "可转债发行数据",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "cb_daily",
+          "name": "可转债日线数据",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        }
+      ]
+    },
+    "外汇数据": {
+      "name": "外汇数据",
+      "total_apis": 2,
+      "available_apis": 2,
+      "apis": [
+        {
+          "api": "fx_obasic",
+          "name": "外汇基础信息（海外）",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "fx_daily",
+          "name": "外汇日线行情",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        }
+      ]
+    },
+    "指数数据": {
+      "name": "指数数据",
+      "total_apis": 8,
+      "available_apis": 3,
+      "apis": [
+        {
+          "api": "index_basic",
+          "name": "指数基本信息",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "index_daily",
+          "name": "指数日线行情",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "index_weekly",
+          "name": "指数周线行情",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "index_monthly",
+          "name": "指数月线行情",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "index_weight",
+          "name": "指数成分和权重",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "index_dailybasic",
+          "name": "大盘指数每日指标",
+          "points_required": 4000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "index_classify",
+          "name": "申万行业分类",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "index_member_all",
+          "name": "申万行业成分",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        }
+      ]
+    },
+    "港股数据": {
+      "name": "港股数据",
+      "total_apis": 3,
+      "available_apis": 2,
+      "apis": [
+        {
+          "api": "hk_basic",
+          "name": "港股列表",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "hk_daily",
+          "name": "港股日线行情",
+          "points_required": 1000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "hk_mins",
+          "name": "港股分钟行情",
+          "points_required": 2000,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        }
+      ]
+    },
+    "宏观经济": {
+      "name": "宏观经济",
+      "total_apis": 7,
+      "available_apis": 7,
+      "apis": [
+        {
+          "api": "shibor",
+          "name": "SHIBOR利率数据",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "shibor_quote",
+          "name": "SHIBOR报价数据",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "shibor_lpr",
+          "name": "LPR贷款基础利率",
+          "points_required": 120,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "libor",
+          "name": "LIBOR拆借利率",
+          "points_required": 120,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "hibor",
+          "name": "HIBOR拆借利率",
+          "points_required": 120,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "wz_index",
+          "name": "温州民间借贷利率",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "gz_index",
+          "name": "广州民间借贷利率",
+          "points_required": 2000,
+          "status": "可用",
+          "call_status": true
+        }
+      ]
+    },
+    "行业特色": {
+      "name": "行业特色",
+      "total_apis": 8,
+      "available_apis": 2,
+      "apis": [
+        {
+          "api": "tmt_twincome",
+          "name": "台湾电子产业月营收",
+          "points_required": 0,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "tmt_twincomedetail",
+          "name": "台湾电子产业月营收明细",
+          "points_required": 0,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "bo_monthly",
+          "name": "电影月度票房",
+          "points_required": 500,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "bo_weekly",
+          "name": "电影周度票房",
+          "points_required": 500,
+          "status": "可用",
+          "call_status": true
+        },
+        {
+          "api": "bo_daily",
+          "name": "电影日度票房",
+          "points_required": 500,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "bo_cinema",
+          "name": "影院每日票房",
+          "points_required": 500,
+          "status": "错误: 查询数据失败，请确认参数！可以反馈管理员协助您排查问题...",
+          "call_status": false
+        },
+        {
+          "api": "film_record",
+          "name": "全国电影剧本备案数据",
+          "points_required": 120,
+          "status": "错误: 请指定正确的接口名...",
+          "call_status": false
+        },
+        {
+          "api": "teleplay_record",
+          "name": "全国电视剧本备案数据",
+          "points_required": 600,
+          "status": "可用",
+          "call_status": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>量化策略编辑器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .panel h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 200px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        
+        .result-panel {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .result-content {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .template-selector {
+            margin-bottom: 15px;
+        }
+        
+        .parameter-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .parameter-input {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .parameter-input .param-description {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+            margin-bottom: 5px;
+            font-style: italic;
+        }
+        
+        .param-unit {
+            font-size: 11px;
+            color: #999;
+            margin-left: 5px;
+        }
+        
+        .param-metadata {
+            display: none;
+            font-size: 10px;
+            color: #888;
+            margin-top: 3px;
+        }
+        
+        .advanced-toggle {
+            font-size: 12px;
+            color: #667eea;
+            cursor: pointer;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .advanced-toggle:hover {
+            text-decoration: underline;
+        }
+        
+        .parameter-input label {
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+        
+        .parameter-input input {
+            padding: 5px;
+            font-size: 12px;
+        }
+        
+        .code-editor {
+            position: relative;
+        }
+        
+        .code-editor textarea {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 量化策略编辑器</h1>
+            <p>编写、验证和回测您的量化交易策略</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h3>📝 策略配置</h3>
+                
+                <div class="form-group">
+                    <label for="stockCode">股票代码</label>
+                    <input type="text" id="stockCode" value="600519.SH" placeholder="例如: 600519.SH">
+                </div>
+                
+                <div class="form-group">
+                    <label for="startDate">开始日期</label>
+                    <input type="date" id="startDate" value="2024-01-01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="endDate">结束日期</label>
+                    <input type="date" id="endDate" value="2024-12-31">
+                </div>
+                
+                <div class="form-group">
+                    <label for="initialCapital">初始资金</label>
+                    <input type="number" id="initialCapital" value="100000" min="1000" step="1000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="commissionRate">手续费率</label>
+                    <input type="number" id="commissionRate" value="0.001" min="0" max="0.01" step="0.0001">
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>🎯 策略模板</h3>
+                
+                <div class="form-group">
+                    <label for="templateSelect">选择模板</label>
+                    <select id="templateSelect">
+                        <option value="">请选择模板...</option>
+                    </select>
+                </div>
+                
+                <div class="parameter-inputs" id="parameterInputs">
+                        <!-- 动态生成的参数输入框 -->
+                    </div>
+                    <div class="form-group">
+                        <label for="strategyDescription">策略描述</label>
+                        <textarea id="strategyDescription" rows="3" placeholder="请输入策略描述..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="saveAsTemplate">
+                        <label for="saveAsTemplate">保存为自定义模板</label>
+                    </div>
+                
+                <button class="btn btn-secondary" onclick="loadTemplate()">加载模板</button>
+                <button class="btn btn-secondary" onclick="clearCode()">清空代码</button>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h3>💻 策略代码编辑器</h3>
+            <div class="code-editor">
+                    <textarea id="strategyCode" placeholder="在这里编写您的策略代码..." style="outline: none;">import pandas as pd
+import numpy as np
+
+# 双均线策略 - 优化版
+def strategy(df):
+    try:
+        # 计算短期均线和长期均线 - 注意数据库中字段名为close_price
+        short_window = 5
+        long_window = 20
+        
+        df['short_ma'] = df['close_price'].rolling(window=short_window).mean()
+        df['long_ma'] = df['close_price'].rolling(window=long_window).mean()
+        
+        # 初始化信号和持仓列
+        df['signal'] = 0  # 0: 无操作, 1: 买入, -1: 卖出
+        df['position'] = 0  # 0: 空仓, 1: 持仓
+        
+        # 生成交易信号：金叉和死叉
+        # 使用向量化操作替代循环，提高效率
+        # 避免使用未来函数：确保有足够的数据计算均线
+        start_idx = long_window  # 使用较大的窗口长度作为起始索引
+        
+        # 初始化持仓状态
+        current_position = 0
+        
+        # 使用.loc索引避免SettingWithCopyWarning
+        for i in range(start_idx, len(df)):
+            # 确保前一天的数据有效
+            if i > 0 and not pd.isna(df.loc[i, 'short_ma']) and not pd.isna(df.loc[i, 'long_ma']):
+                # 金叉：短期均线上穿长期均线，且当前为空仓
+                if df.loc[i, 'short_ma'] > df.loc[i, 'long_ma'] and current_position == 0:
+                    df.loc[i, 'signal'] = 1  # 买入信号
+                    current_position = 1
+                # 死叉：短期均线下穿长期均线，且当前为持仓
+                elif df.loc[i, 'short_ma'] < df.loc[i, 'long_ma'] and current_position == 1:
+                    df.loc[i, 'signal'] = -1  # 卖出信号
+                    current_position = 0
+        
+        # 根据信号调整持仓 - 使用.loc索引
+        for i in range(1, len(df)):
+            if df.loc[i, 'signal'] == 1:
+                df.loc[i, 'position'] = 1  # 买入并持有
+            elif df.loc[i, 'signal'] == -1:
+                df.loc[i, 'position'] = 0  # 卖出并空仓
+            else:
+                df.loc[i, 'position'] = df.loc[i-1, 'position']  # 保持之前的持仓
+                
+        print(f"策略计算完成: 生成了{df['signal'].abs().sum()}个交易信号")
+    except Exception as e:
+        # 错误处理，确保策略可以正常执行
+        print(f"策略执行过程中出错: {str(e)}")
+        # 至少保留空仓状态，避免回测失败
+        df['signal'] = 0
+        df['position'] = 0
+    
+    return df</textarea>
+                </div>
+                <div class="help-text">
+                    💡 提示：代码中可以使用 df 变量访问股票数据，需要设置 signal 和 position 列
+                </div>
+        </div>
+        
+        <div class="panel">
+            <h3>🔧 操作面板</h3>
+            <button class="btn" onclick="validateStrategy()">验证策略</button>
+            <button class="btn btn-success" onclick="runStrategy()">运行回测</button>
+            <button class="btn btn-secondary" onclick="saveStrategy()">保存策略</button>
+            <button class="btn btn-danger" onclick="clearAll()">清空所有</button>
+        </div>
+        
+        <div class="result-panel">
+            <h3>📊 回测结果</h3>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>正在处理中...</p>
+            </div>
+            <div id="resultContent" class="result-content">
+                <p style="color: #666; text-align: center;">请编写策略代码并点击"运行回测"查看结果</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let currentTemplate = null;
+        let templates = {};
+
+        // 页面加载时获取策略模板
+        window.onload = function() {
+            loadTemplates();
+        };
+
+        // 加载策略模板
+        async function loadTemplates() {
+            try {
+                const response = await fetch(`${API_BASE}/strategy-editor/templates`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    templates = result.data;
+                    const select = document.getElementById('templateSelect');
+                    select.innerHTML = '<option value="">请选择模板...</option>';
+                    
+                    for (const [key, template] of Object.entries(templates)) {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = template.name;
+                        select.appendChild(option);
+                    }
+                } else {
+                    showError('加载模板失败: ' + result.message);
+                }
+            } catch (error) {
+                showError('加载模板失败: ' + error.message);
+            }
+        }
+
+        // 加载选中的模板
+        function loadTemplate() {
+            const templateKey = document.getElementById('templateSelect').value;
+            if (!templateKey || !templates[templateKey]) {
+                showError('请选择一个有效的模板');
+                return;
+            }
+
+            const template = templates[templateKey];
+            currentTemplate = template;
+            
+            // 加载代码
+            document.getElementById('strategyCode').value = template.code;
+            
+            // 生成参数输入框
+            generateParameterInputs(template.parameters);
+        }
+
+        // 生成参数输入框
+        function generateParameterInputs(parameters) {
+            const container = document.getElementById('parameterInputs');
+            container.innerHTML = '';
+            
+            if (!parameters || Object.keys(parameters).length === 0) {
+                const div = document.createElement('div');
+                div.style.textAlign = 'center';
+                div.style.color = '#666';
+                div.style.padding = '20px';
+                div.textContent = '此模板不需要参数或未定义参数';
+                container.appendChild(div);
+                return;
+            }
+            
+            for (const [key, param] of Object.entries(parameters)) {
+                const div = document.createElement('div');
+                div.className = 'parameter-input';
+                
+                const labelContainer = document.createElement('div');
+                labelContainer.style.display = 'flex';
+                labelContainer.style.justifyContent = 'space-between';
+                labelContainer.style.alignItems = 'center';
+                
+                const label = document.createElement('label');
+                label.textContent = key;
+                
+                const paramType = document.createElement('span');
+                paramType.className = 'param-unit';
+                paramType.textContent = `(${param.type})`;
+                
+                labelContainer.appendChild(label);
+                labelContainer.appendChild(paramType);
+                
+                const description = document.createElement('div');
+                description.className = 'param-description';
+                description.textContent = param.description || '无描述';
+                
+                const input = document.createElement('input');
+                input.type = param.type === 'int' ? 'number' : 'number';
+                input.value = param.default;
+                input.min = param.min || '';
+                input.max = param.max || '';
+                input.step = param.type === 'float' ? '0.01' : '1';
+                input.id = `param_${key}`;
+                
+                // 添加参数元数据展示
+                const metadata = document.createElement('div');
+                metadata.className = 'param-metadata';
+                metadata.id = `metadata_${key}`;
+                
+                // 高级选项切换
+                const toggle = document.createElement('div');
+                toggle.className = 'advanced-toggle';
+                toggle.textContent = '高级选项 ▼';
+                toggle.onclick = function() {
+                    const metaEl = document.getElementById(`metadata_${key}`);
+                    if (metaEl.style.display === 'block') {
+                        metaEl.style.display = 'none';
+                        toggle.textContent = '高级选项 ▼';
+                    } else {
+                        metaEl.style.display = 'block';
+                        toggle.textContent = '高级选项 ▲';
+                        updateMetadataDisplay(key, param);
+                    }
+                };
+                
+                div.appendChild(labelContainer);
+                div.appendChild(description);
+                div.appendChild(input);
+                div.appendChild(metadata);
+                div.appendChild(toggle);
+                container.appendChild(div);
+            }
+        }
+        
+        // 更新参数元数据显示
+        function updateMetadataDisplay(paramKey, param) {
+            const metadata = document.getElementById(`metadata_${paramKey}`);
+            const content = [];
+            
+            if (param.min !== undefined) content.push(`最小值: ${param.min}`);
+            if (param.max !== undefined) content.push(`最大值: ${param.max}`);
+            if (param.step !== undefined) content.push(`步长: ${param.step}`);
+            if (param.options) content.push(`选项: ${param.options.join(', ')}`);
+            
+            if (content.length > 0) {
+                metadata.innerHTML = content.join(' | ');
+            } else {
+                metadata.textContent = '无额外元数据';
+            }
+        }
+
+        // 获取参数值
+        function getParameters() {
+            const params = {};
+            const inputs = document.querySelectorAll('.parameter-input input[id^="param_"]');
+            
+            inputs.forEach(input => {
+                const paramKey = input.id.replace('param_', '');
+                const value = input.type === 'number' && input.step && input.step.includes('.') 
+                    ? parseFloat(input.value) 
+                    : parseInt(input.value);
+                params[paramKey] = value;
+            });
+            
+            return params;
+        }
+
+        // 验证策略
+        async function validateStrategy() {
+            const code = document.getElementById('strategyCode').value.trim();
+            if (!code) {
+                showError('请输入策略代码');
+                return;
+            }
+
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/strategy-editor/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        parameters: getParameters()
+                    })
+                });
+                
+                const result = await response.json();
+                showLoading(false);
+                
+                if (result.success) {
+                    showSuccess('策略验证通过！');
+                } else {
+                    showError('策略验证失败: ' + result.message);
+                }
+            } catch (error) {
+                showLoading(false);
+                showError('验证请求失败: ' + error.message);
+            }
+        }
+
+        // 运行策略
+        async function runStrategy() {
+            const code = document.getElementById('strategyCode').value.trim();
+            if (!code) {
+                showError('请输入策略代码');
+                return;
+            }
+
+            const stockCode = document.getElementById('stockCode').value.trim();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const initialCapital = parseFloat(document.getElementById('initialCapital').value);
+            const commissionRate = parseFloat(document.getElementById('commissionRate').value);
+
+            if (!stockCode || !startDate || !endDate) {
+                showError('请填写完整的回测参数');
+                return;
+            }
+
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/strategy-editor/run`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        stock_code: stockCode,
+                        start_date: startDate,
+                        end_date: endDate,
+                        code: code,
+                        parameters: getParameters(),
+                        initial_capital: initialCapital,
+                        commission_rate: commissionRate
+                    })
+                });
+                
+                const result = await response.json();
+                showLoading(false);
+                
+                if (result.success) {
+                    displayResults(result.data);
+                } else {
+                    showError('策略运行失败: ' + result.message);
+                }
+            } catch (error) {
+                showLoading(false);
+                showError('运行请求失败: ' + error.message);
+            }
+        }
+
+        // 保存策略
+        async function saveStrategy() {
+            const code = document.getElementById('strategyCode').value.trim();
+            if (!code) {
+                showError('请输入策略代码');
+                return;
+            }
+
+            const name = prompt('请输入策略名称:');
+            if (!name) {
+                return;
+            }
+
+            const description = document.getElementById('strategyDescription').value.trim() || '';
+            const saveAsTemplate = document.getElementById('saveAsTemplate').checked;
+
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/strategy-editor/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        code: code,
+                        parameters: getParameters(),
+                        description: description,
+                        save_as_template: saveAsTemplate
+                    })
+                });
+                
+                const result = await response.json();
+                showLoading(false);
+                
+                if (result.success) {
+                    let message = `策略保存成功！策略ID: ${result.data.strategy_id}`;
+                    if (saveAsTemplate) {
+                        message += '\n已保存为自定义模板';
+                    }
+                    showSuccess(message);
+                } else {
+                    showError('策略保存失败: ' + result.message);
+                }
+            } catch (error) {
+                showLoading(false);
+                showError('保存请求失败: ' + error.message);
+            }
+        }
+
+        // 显示回测结果
+        function displayResults(data) {
+            const content = document.getElementById('resultContent');
+            
+            // 格式化百分比和金额
+            const formatPercent = (val) => `${(val * 100).toFixed(2)}%`;
+            const formatCurrency = (val) => `¥${val.toLocaleString()}`;
+            
+            // 确定收益率颜色
+            const returnColor = data.total_return >= 0 ? 'text-green-600' : 'text-red-600';
+            
+            const html = `
+                <div class="success bg-green-50 border border-green-200 p-4 rounded-lg">
+                    <h4 class="text-xl font-bold text-green-800 flex items-center">
+                        🎉 回测完成！
+                    </h4>
+                </div>
+                
+                <!-- 收益概览卡片 -->
+                <div class="mt-4 mb-6 bg-white rounded-xl shadow-md p-5 border border-gray-100">
+                    <h5 class="text-lg font-semibold text-gray-700 mb-3">📊 收益概览</h5>
+                    <div class="text-3xl font-bold ${returnColor} mb-2">
+                        ${formatPercent(data.total_return)}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        总收益率
+                    </div>
+                    <div class="flex flex-wrap gap-4 mt-4">
+                        <div class="text-center">
+                            <div class="text-gray-500 text-xs">初始资金</div>
+                            <div class="text-lg font-semibold">${formatCurrency(data.initial_capital)}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-gray-500 text-xs">最终资金</div>
+                            <div class="text-lg font-semibold">${formatCurrency(data.final_capital)}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-gray-500 text-xs">年化收益率</div>
+                            <div class="text-lg font-semibold">${formatPercent(data.annual_return)}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-gray-500 text-xs">交易次数</div>
+                            <div class="text-lg font-semibold">${data.trade_count}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 详细指标网格 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0;">
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 8px; border: 1px solid #bbdefb; transition: transform 0.2s;">
+                        <strong class="text-blue-700">最大回撤</strong><br>
+                        <span class="text-lg">${formatPercent(data.max_drawdown)}</span>
+                    </div>
+                    <div style="background: #e0f2f1; padding: 10px; border-radius: 8px; border: 1px solid #b2dfdb; transition: transform 0.2s;">
+                        <strong class="text-teal-700">夏普比率</strong><br>
+                        <span class="text-lg">${data.sharpe_ratio.toFixed(2)}</span>
+                    </div>
+                    <div style="background: #f1f8e9; padding: 10px; border-radius: 8px; border: 1px solid #dcedc8; transition: transform 0.2s;">
+                        <strong class="text-lime-700">胜率</strong><br>
+                        <span class="text-lg">${formatPercent(data.win_rate)}</span>
+                    </div>
+                    <div style="background: #f3e5f5; padding: 10px; border-radius: 8px; border: 1px solid #e1bee7; transition: transform 0.2s;">
+                        <strong class="text-purple-700">盈亏比</strong><br>
+                        <span class="text-lg">${data.profit_loss_ratio ? data.profit_loss_ratio.toFixed(2) : '-'}</span>
+                    </div>
+                </div>
+                
+                ${data.parameters && Object.keys(data.parameters).length > 0 ? `
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">⚙️ 使用的参数</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e9ecef;">
+                        <div class="grid grid-cols-2 gap-3">
+                            ${Object.entries(data.parameters).map(([key, value]) => `
+                                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f3f4;">
+                                    <span class="text-gray-600">${key}:</span>
+                                    <span class="font-medium">${value}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${data.trades && data.trades.length > 0 ? `
+                    <h4 class="text-lg font-semibold text-gray-700 mt-6 mb-3">📝 交易记录</h4>
+                    <div style="max-height: 300px; overflow-y: auto; border-radius: 8px; border: 1px solid #e0e0e0;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background: #f5f5f5; position: sticky; top: 0; z-index: 10;">
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">日期</th>
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">操作</th>
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: right;">价格</th>
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: right;">数量</th>
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: right;">金额</th>
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: right;">收益</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.trades.map(trade => `
+                                    <tr style="transition: background-color 0.2s; cursor: pointer;" onmouseover="this.style.backgroundColor='#f9f9f9'" onmouseout="this.style.backgroundColor=''">
+                                        <td style="border: 1px solid #ddd; padding: 10px;">${trade.date}</td>
+                                        <td style="border: 1px solid #ddd; padding: 10px;">
+                                            <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; color: white; font-weight: 500; background-color: ${trade.action === 'buy' ? '#4caf50' : '#f44336'};">
+                                                ${trade.action === 'buy' ? '买入' : '卖出'}
+                                            </span>
+                                        </td>
+                                        <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">¥${trade.price.toFixed(2)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">${trade.shares.toLocaleString()}</td>
+                                        <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">¥${(trade.price * trade.shares).toFixed(2)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">
+                                            ${trade.trade_return ? 
+                                                `<span style="font-weight: 500; color: ${trade.trade_return >= 0 ? 'green' : 'red'}">${(trade.trade_return * 100).toFixed(2)}%</span>` : '-'}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : `
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 text-center text-gray-500 mt-4">
+                        <p>📝 暂无交易记录</p>
+                        <p class="text-sm mt-2">策略未生成任何交易信号，请检查策略逻辑</p>
+                    </div>
+                `}
+            `;
+            
+            content.innerHTML = html;
+        }
+
+        // 显示加载状态
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            if (!show) {
+                document.getElementById('resultContent').style.display = 'block';
+            }
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const content = document.getElementById('resultContent');
+            content.innerHTML = `<div class="error">❌ ${message}</div>`;
+        }
+
+        // 显示成功信息
+        function showSuccess(message) {
+            const content = document.getElementById('resultContent');
+            content.innerHTML = `<div class="success">✅ ${message}</div>`;
+        }
+
+        // 清空代码
+        function clearCode() {
+            document.getElementById('strategyCode').value = '';
+            document.getElementById('parameterInputs').innerHTML = '';
+            currentTemplate = null;
+        }
+
+        // 清空所有
+        function clearAll() {
+            if (confirm('确定要清空所有内容吗？')) {
+                clearCode();
+                document.getElementById('stockCode').value = '600519.SH';
+                document.getElementById('startDate').value = '2024-01-01';
+                document.getElementById('endDate').value = '2024-12-31';
+                document.getElementById('initialCapital').value = '100000';
+                document.getElementById('commissionRate').value = '0.001';
+                document.getElementById('templateSelect').value = '';
+                document.getElementById('strategyDescription').value = '';
+                document.getElementById('saveAsTemplate').checked = false;
+                document.getElementById('resultContent').innerHTML = '<p style="color: #666; text-align: center;">请编写策略代码并点击"运行回测"查看结果</p>';
+            }
+        }
+        
+        // 页面加载完成后的初始化
+        window.onload = function() {
+            loadTemplates();
+            
+            // 添加键盘快捷键支持
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+S 保存策略
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    saveStrategy();
+                }
+                // Ctrl+R 运行回测
+                if (e.ctrlKey && e.key === 'r') {
+                    e.preventDefault();
+                    runStrategy();
+                }
+                // Ctrl+V 验证策略
+                if (e.ctrlKey && e.key === 'v') {
+                    e.preventDefault();
+                    validateStrategy();
+                }
+            });
+            
+            // 初始化代码编辑器的自动补全功能
+            initCodeEditorFeatures();
+        };
+        
+        // 初始化代码编辑器功能
+        function initCodeEditorFeatures() {
+            const codeEditor = document.getElementById('strategyCode');
+            
+            // 确保文本区域可编辑
+            codeEditor.readOnly = false;
+            codeEditor.disabled = false;
+            
+            // 自动缩进
+            codeEditor.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    const value = this.value;
+                    
+                    this.value = value.substring(0, start) + '    ' + value.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 4;
+                }
+            });
+            
+            // 添加代码折叠提示
+            const helpText = document.querySelector('.help-text');
+            helpText.innerHTML = `💡 提示：
+- 代码中可以使用 df 变量访问股票数据
+- 需要设置 signal 和 position 列
+- 支持键盘快捷键：Ctrl+S(保存)、Ctrl+R(运行)、Ctrl+V(验证)\n- Tab键可以快速缩进`;
+        }
+    </script>
+</body>
+</html>

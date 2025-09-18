@@ -1,0 +1,10 @@
+{
+  "strategy_id": "strategy_1758108137851",
+  "name": "songjiayin",
+  "code": "import pandas as pd\nimport numpy as np\n\n# 双均线策略示例代码\ndef strategy(df):\n    # 计算短期均线和长期均线 - 注意数据库中字段名为close_price\n    df['short_ma'] = df['close_price'].rolling(window=5).mean()\n    df['long_ma'] = df['close_price'].rolling(window=20).mean()\n    \n    # 初始化信号和持仓列\n    df['signal'] = 0  # 0: 无操作, 1: 买入, -1: 卖出\n    df['position'] = 0  # 0: 空仓, 1: 持仓\n    \n    # 生成交易信号：使用简化逻辑\n    # 避免使用未来函数：确保有足够的数据计算均线\n    start_idx = max(5, 20)  # 使用较大的窗口长度作为起始索引\n    \n    # 初始化持仓状态\n    current_position = 0\n    \n    # 使用.loc索引避免SettingWithCopyWarning\n    for i in range(start_idx, len(df)):\n        # 简化的信号生成逻辑\n        if df.loc[i, 'short_ma'] > df.loc[i, 'long_ma'] and current_position == 0:\n            df.loc[i, 'signal'] = 1  # 买入信号\n            current_position = 1\n        elif df.loc[i, 'short_ma'] < df.loc[i, 'long_ma'] and current_position == 1:\n            df.loc[i, 'signal'] = -1  # 卖出信号\n            current_position = 0\n    \n    # 根据信号调整持仓 - 使用.loc索引\n    for i in range(1, len(df)):\n        if df.loc[i, 'signal'] == 1:\n            df.loc[i, 'position'] = 1  # 买入并持有\n        elif df.loc[i, 'signal'] == -1:\n            df.loc[i, 'position'] = 0  # 卖出并空仓\n        else:\n            df.loc[i, 'position'] = df.loc[i-1, 'position']  # 保持之前的持仓\n    \n    return df",
+  "parameters": {},
+  "metadata": {},
+  "description": "",
+  "create_time": "2025-09-17T19:22:17.861444",
+  "type": "custom"
+}

@@ -1,0 +1,21 @@
+name: quant_trading
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+      - tushare
+      - pymysql
+      - cryptography
+      - backtrader
+      - matplotlib
+      - dash
+      - dash-core-components
+      - dash-html-components
+      - dash-bootstrap-components
+      - plotly
+      - pandas
+      - numpy
+      - Flask
+      - waitress

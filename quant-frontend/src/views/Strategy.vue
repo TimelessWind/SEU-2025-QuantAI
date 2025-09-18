@@ -1,0 +1,380 @@
+<template>
+  <div class="strategy-container">
+    <div class="page-header">
+      <h1 class="page-title">策略管理</h1>
+      <p class="page-subtitle">创建和管理量化投资策略</p>
+    </div>
+
+    <div class="strategy-content">
+      <!-- 策略列表 -->
+      <el-card class="strategy-card">
+        <template #header>
+          <div class="card-header">
+            <h3 class="card-title">投资策略</h3>
+            <el-button 
+              v-if="canCreateStrategy" 
+              type="primary" 
+              @click="showCreateDialog"
+            >
+              <el-icon><Plus /></el-icon>
+              创建策略
+            </el-button>
+            <el-tooltip v-else content="只有分析师和管理员可以创建策略" placement="top">
+              <el-button type="primary" disabled>
+                <el-icon><Plus /></el-icon>
+                创建策略
+              </el-button>
+            </el-tooltip>
+          </div>
+        </template>
+
+        <el-table :data="strategies" style="width: 100%">
+          <el-table-column prop="name" label="策略名称" width="200" />
+          <el-table-column prop="type" label="类型" width="120">
+            <template #default="{ row }">
+              <el-tag :type="row.type === 'builtin' ? 'success' : 'primary'">
+                {{ row.type === 'builtin' ? '内置策略' : '自定义策略' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="策略描述" />
+          <el-table-column prop="createTime" label="创建时间" width="180" />
+          <el-table-column label="操作" width="200">
+            <template #default="{ row }">
+              <!-- 自定义策略的编辑按钮，只对管理员可点击 -->
+              <el-button 
+                v-if="row.type !== 'builtin'"
+                type="primary" 
+                size="small" 
+                :disabled="!isAdmin"
+                :title="isAdmin ? '编辑策略' : '只有管理员可以编辑策略'"
+                @click="editStrategy(row)"
+              >
+                编辑
+              </el-button>
+              <el-button type="success" size="small" @click="backtestStrategy(row)">
+                回测
+              </el-button>
+              <el-button 
+                v-if="canCreateStrategy && row.type !== 'builtin'" 
+                type="danger" 
+                size="small" 
+                @click="deleteStrategy(row)"
+              >
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
+
+      <!-- 创建/编辑策略对话框 -->
+      <el-dialog
+        v-model="dialogVisible"
+        :title="isEdit ? '编辑策略' : '创建策略'"
+        width="800px"
+        @close="resetForm"
+      >
+        <el-form :model="strategyForm" :rules="strategyRules" ref="strategyFormRef" label-width="120px">
+          <el-form-item label="策略名称" prop="name">
+            <el-input v-model="strategyForm.name" placeholder="请输入策略名称" />
+          </el-form-item>
+          
+          <el-form-item label="策略描述" prop="description">
+            <el-input
+              v-model="strategyForm.description"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入策略描述"
+            />
+          </el-form-item>
+          
+          <el-form-item label="策略条件">
+            <div class="condition-list">
+              <div
+                v-for="(condition, index) in strategyForm.conditions"
+                :key="index"
+                class="condition-item"
+              >
+                <el-select v-model="condition.indicator" placeholder="选择指标" style="width: 150px">
+                  <el-option label="PE市盈率" value="pe" />
+                  <el-option label="PB市净率" value="pb" />
+                  <el-option label="市值" value="market_cap" />
+                  <el-option label="成交量" value="volume" />
+                  <el-option label="涨跌幅" value="change_percent" />
+                </el-select>
+                
+                <el-select v-model="condition.operator" placeholder="条件" style="width: 100px">
+                  <el-option label="大于" value=">" />
+                  <el-option label="小于" value="<" />
+                  <el-option label="等于" value="=" />
+                  <el-option label="介于" value="between" />
+                </el-select>
+                
+                <el-input-number
+                  v-model="condition.value"
+                  :precision="2"
+                  placeholder="值"
+                  style="width: 120px"
+                />
+                
+                <el-button type="danger" size="small" @click="removeCondition(index)">
+                  <el-icon><Delete /></el-icon>
+                </el-button>
+              </div>
+              
+              <el-button type="dashed" @click="addCondition" style="width: 100%">
+                <el-icon><Plus /></el-icon>
+                添加条件
+              </el-button>
+            </div>
+          </el-form-item>
+        </el-form>
+        
+        <template #footer>
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="saveStrategy" :loading="saving">
+            {{ isEdit ? '更新' : '创建' }}
+          </el-button>
+        </template>
+      </el-dialog>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '../stores/user'
+import api from '../utils/api'
+
+const dialogVisible = ref(false)
+const isEdit = ref(false)
+const saving = ref(false)
+const strategyFormRef = ref()
+
+// 用户权限
+const userStore = useUserStore()
+const { canCreateStrategy, isAdmin } = userStore
+
+const strategies = ref([])
+
+const strategyForm = reactive({
+  id: '',
+  name: '',
+  description: '',
+  conditions: []
+})
+
+const strategyRules = {
+  name: [
+    { required: true, message: '请输入策略名称', trigger: 'blur' }
+  ],
+  description: [
+    { required: true, message: '请输入策略描述', trigger: 'blur' }
+  ]
+}
+
+const showCreateDialog = () => {
+  // 打开策略编辑器页面
+  window.open('/strategy_editor_frontend.html', '_blank')
+}
+
+const editStrategy = async (strategy) => {
+  if (!isAdmin.value) {
+    ElMessage.info('只有管理员可以编辑策略')
+    return
+  }
+  
+  try {
+    // 从数据库获取策略的完整内容
+    const response = await api.get(`/strategies/${strategy.id}`)
+    const fullStrategy = response.data
+    
+    // 打开策略编辑器页面，并传递策略ID参数
+    window.open(`/strategy_editor_frontend.html?strategy_id=${strategy.id}`, '_blank')
+  } catch (error) {
+    console.error('加载策略详情失败:', error)
+    ElMessage.error('加载策略详情失败，请重试')
+  }
+}
+
+const backtestStrategy = (strategy) => {
+  // 跳转到回测分析界面，并传递策略ID参数
+  // 使用正确的路由路径 '/backtest'
+  window.open(`/backtest?strategy_id=${strategy.id}&strategy_name=${encodeURIComponent(strategy.name)}`, '_blank')
+}
+
+const deleteStrategy = async (strategy) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除策略 "${strategy.name}" 吗？`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 调用API删除策略
+    await api.delete(`/strategies/${strategy.id}`)
+    
+    // 从列表中移除
+    const index = strategies.value.findIndex(s => s.id === strategy.id)
+    if (index > -1) {
+      strategies.value.splice(index, 1)
+    }
+    
+    ElMessage.success('策略删除成功')
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败，请重试')
+    }
+  }
+}
+
+const addCondition = () => {
+  strategyForm.conditions.push({
+    indicator: '',
+    operator: '',
+    value: null
+  })
+}
+
+const removeCondition = (index) => {
+  strategyForm.conditions.splice(index, 1)
+}
+
+const resetForm = () => {
+  strategyForm.id = ''
+  strategyForm.name = ''
+  strategyForm.description = ''
+  strategyForm.conditions = []
+  if (strategyFormRef.value) {
+    strategyFormRef.value.resetFields()
+  }
+}
+
+const saveStrategy = async () => {
+  if (!strategyFormRef.value) return
+  
+  await strategyFormRef.value.validate(async (valid) => {
+    if (valid) {
+      saving.value = true
+      
+      try {
+        if (isEdit.value) {
+          // 更新策略
+          await api.put(`/strategies/${strategyForm.id}`, {
+            name: strategyForm.name,
+            description: strategyForm.description,
+            conditions: strategyForm.conditions
+          })
+          
+          // 更新本地列表
+          const index = strategies.value.findIndex(s => s.id === strategyForm.id)
+          if (index > -1) {
+            strategies.value[index] = {
+              ...strategies.value[index],
+              name: strategyForm.name,
+              description: strategyForm.description
+            }
+          }
+        } else {
+          // 创建策略
+          const response = await api.post('/strategies', {
+            name: strategyForm.name,
+            description: strategyForm.description,
+            conditions: strategyForm.conditions
+          })
+          
+          // 添加到本地列表
+          strategies.value.unshift({
+            id: response.data.strategyId,
+            name: strategyForm.name,
+            type: 'custom',
+            description: strategyForm.description,
+            createTime: new Date().toLocaleString()
+          })
+        }
+        
+        ElMessage.success(isEdit.value ? '策略更新成功' : '策略创建成功')
+        dialogVisible.value = false
+        resetForm()
+      } catch (error) {
+        ElMessage.error('保存失败，请重试')
+      } finally {
+        saving.value = false
+      }
+    }
+  })
+}
+
+onMounted(async () => {
+  // 加载策略列表
+  try {
+    const response = await api.get('/strategies')
+    strategies.value = response.data.strategies
+  } catch (error) {
+    console.error('加载策略列表失败:', error)
+    ElMessage.error('加载策略列表失败')
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.strategy-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.page-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.strategy-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.strategy-card {
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-title {
+    margin: 0;
+  }
+}
+
+.condition-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.condition-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+</style>

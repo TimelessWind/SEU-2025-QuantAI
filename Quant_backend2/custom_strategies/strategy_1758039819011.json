@@ -1,0 +1,18 @@
+{
+  "strategy_id": "strategy_1758039819011",
+  "name": "测试策略",
+  "code": "\n# 简单的价格突破策略\ndf['ma_20'] = df['close_price'].rolling(window=20).mean()\ndf['ma_5'] = df['close_price'].rolling(window=5).mean()\n\nfor i in range(20, len(df)):\n    if df.loc[i, 'ma_5'] > df.loc[i, 'ma_20'] and df.loc[i-1, 'ma_5'] <= df.loc[i-1, 'ma_20']:\n        df.loc[i, 'signal'] = 1\n        df.loc[i, 'position'] = 1\n    elif df.loc[i, 'ma_5'] < df.loc[i, 'ma_20'] and df.loc[i-1, 'ma_5'] >= df.loc[i-1, 'ma_20']:\n        df.loc[i, 'signal'] = -1\n        df.loc[i, 'position'] = 0\n    else:\n        df.loc[i, 'position'] = df.loc[i-1, 'position']\n",
+  "parameters": {
+    "period": 20
+  },
+  "metadata": {
+    "period": {
+      "type": "int",
+      "description": "",
+      "default": 20
+    }
+  },
+  "description": "这是一个测试策略",
+  "create_time": "2025-09-17T00:23:39.022573",
+  "type": "custom"
+}

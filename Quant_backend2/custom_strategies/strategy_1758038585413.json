@@ -1,0 +1,15 @@
+{
+  "strategy_id": "strategy_1758038585413",
+  "name": "测试参数保存策略",
+  "code": "def generate_signals(df, params):\n    # 简单的双均线策略示例\n    short_period = params.get('short_period', 5)\n    long_period = params.get('long_period', 20)\n    \n    df['short_ma'] = df['close_price'].rolling(window=short_period).mean()\n    df['long_ma'] = df['close_price'].rolling(window=long_period).mean()\n    \n    # 生成交易信号\n    df['signal'] = 0\n    df.loc[df['short_ma'] > df['long_ma'], 'signal'] = 1  # 买入信号\n    df.loc[df['short_ma'] < df['long_ma'], 'signal'] = -1  # 卖出信号\n    \n    # 生成持仓信号\n    df['position'] = df['signal'].shift(1).fillna(0)\n    \n    return df\n",
+  "parameters": {
+    "short_period": 10,
+    "long_period": 30,
+    "test_string": "这是一个测试字符串",
+    "test_boolean": true,
+    "test_float": 0.05
+  },
+  "description": "测试策略参数保存功能的策略",
+  "create_time": "2025-09-17T00:03:05.422533",
+  "type": "custom"
+}
