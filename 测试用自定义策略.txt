@@ -1,0 +1,58 @@
+import pandas as pd
+import numpy as np
+
+# RSI策略实现
+def strategy(df):
+    # 计算价格变化
+    df['price_change'] = df['close_price'].diff()
+    
+    # 计算上涨和下跌的变化
+    df['up_change'] = np.where(df['price_change'] > 0, df['price_change'], 0)
+    df['down_change'] = np.where(df['price_change'] < 0, abs(df['price_change']), 0)
+    
+    # 计算RSI（使用14天周期）
+    window_length = 14
+    
+    # 计算平均上涨和下跌
+    df['avg_up'] = df['up_change'].rolling(window=window_length).mean()
+    df['avg_down'] = df['down_change'].rolling(window=window_length).mean()
+    
+    # 计算相对强度(RS)和RSI
+    df['rs'] = df['avg_up'] / df['avg_down']
+    df['rsi'] = 100 - (100 / (1 + df['rs']))
+    
+    # 初始化信号和持仓列
+    df['signal'] = 0  # 0: 无操作, 1: 买入, -1: 卖出
+    df['position'] = 0  # 0: 空仓, 1: 持仓
+    
+    # 设置RSI超买超卖阈值
+    overbought_threshold = 70
+    oversold_threshold = 30
+    
+    # 避免使用未来函数，从有足够数据的位置开始
+    start_idx = window_length + 1
+    
+    # 初始化持仓状态
+    current_position = 0
+    
+    # 生成交易信号
+    for i in range(start_idx, len(df)):
+        # RSI低于超卖阈值且当前为空仓，则买入
+        if df.loc[i, 'rsi'] < oversold_threshold and current_position == 0:
+            df.loc[i, 'signal'] = 1  # 买入信号
+            current_position = 1
+        # RSI高于超买阈值且当前持仓，则卖出
+        elif df.loc[i, 'rsi'] > overbought_threshold and current_position == 1:
+            df.loc[i, 'signal'] = -1  # 卖出信号
+            current_position = 0
+    
+    # 根据信号调整持仓
+    for i in range(1, len(df)):
+        if df.loc[i, 'signal'] == 1:
+            df.loc[i, 'position'] = 1  # 买入并持有
+        elif df.loc[i, 'signal'] == -1:
+            df.loc[i, 'position'] = 0  # 卖出并空仓
+        else:
+            df.loc[i, 'position'] = df.loc[i-1, 'position']  # 保持之前的持仓
+    
+    return df

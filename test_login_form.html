@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录测试表单</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <h1>登录测试</h1>
+    
+    <div class="form-group">
+        <label for="account">账号:</label>
+        <input type="text" id="account" name="account" value="test_user">
+    </div>
+    
+    <div class="form-group">
+        <label for="password">密码:</label>
+        <input type="password" id="password" name="password" value="123456">
+    </div>
+    
+    <button id="loginBtn">登录</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            const account = document.getElementById('account').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '正在发送请求...';
+            
+            fetch('http://localhost:8000/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    account: account,
+                    password: password
+                })
+            })
+            .then(response => {
+                return response.json().then(data => ({
+                    status: response.status,
+                    data: data
+                }));
+            })
+            .then(result => {
+                resultDiv.innerHTML = `
+                    <h3>响应状态: ${result.status}</h3>
+                    <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                `;
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `
+                    <h3>请求错误</h3>
+                    <p>${error.message}</p>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>

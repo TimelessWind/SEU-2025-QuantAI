@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>连接测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981',
+                        danger: '#ef4444',
+                        neutral: '#6b7280'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .shadow-custom {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            }
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800 min-h-screen">
+    <div class="container mx-auto px-4 py-12 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-custom p-8 mb-8">
+            <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-center text-primary mb-6">
+                <i class="fa fa-plug mr-2"></i>系统连接测试
+            </h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="p-5 border border-gray-200 rounded-lg transition-all hover:shadow-md">
+                    <h3 class="text-lg font-semibold mb-3 flex items-center">
+                        <i class="fa fa-server text-primary mr-2"></i>后端连接测试
+                    </h3>
+                    <div id="backend-status" class="mb-4 p-3 bg-gray-50 rounded text-sm">
+                        <i class="fa fa-circle-o-notch fa-spin mr-2"></i>等待测试...
+                    </div>
+                    <button id="test-backend" class="w-full py-2 px-4 bg-primary text-white rounded hover:bg-primary/90 transition-all">
+                        测试后端连接
+                    </button>
+                </div>
+                
+                <div class="p-5 border border-gray-200 rounded-lg transition-all hover:shadow-md">
+                    <h3 class="text-lg font-semibold mb-3 flex items-center">
+                        <i class="fa fa-code-fork text-secondary mr-2"></i>前端代理测试
+                    </h3>
+                    <div id="proxy-status" class="mb-4 p-3 bg-gray-50 rounded text-sm">
+                        <i class="fa fa-circle-o-notch fa-spin mr-2"></i>等待测试...
+                    </div>
+                    <button id="test-proxy" class="w-full py-2 px-4 bg-secondary text-white rounded hover:bg-secondary/90 transition-all">
+                        测试前端代理
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                    <i class="fa fa-database text-neutral mr-2"></i>股票筛选API测试
+                </h3>
+                <div id="api-status" class="mb-4 p-3 bg-gray-50 rounded text-sm">
+                    <i class="fa fa-circle-o-notch fa-spin mr-2"></i>等待测试...
+                </div>
+                <button id="test-stock-filter" class="w-full py-2 px-4 bg-neutral text-white rounded hover:bg-neutral/90 transition-all">
+                    测试股票筛选API
+                </button>
+            </div>
+        </div>
+        
+        <div id="results" class="hidden bg-white rounded-xl shadow-custom p-8">
+            <h2 class="text-xl font-bold mb-4">测试结果</h2>
+            <pre id="results-content" class="bg-gray-50 p-4 rounded text-sm overflow-x-auto"></pre>
+        </div>
+    </div>
+
+    <script>
+        // 后端连接测试
+        document.getElementById('test-backend').addEventListener('click', async function() {
+            const statusEl = document.getElementById('backend-status');
+            statusEl.innerHTML = '<i class="fa fa-circle-o-notch fa-spin mr-2"></i>正在连接...';
+            statusEl.className = 'mb-4 p-3 bg-blue-50 text-blue-800 rounded text-sm';
+            
+            try {
+                const response = await fetch('http://localhost:8000/');
+                if (response.ok) {
+                    statusEl.innerHTML = '<i class="fa fa-check-circle text-green-500 mr-2"></i>后端连接成功！';
+                    statusEl.className = 'mb-4 p-3 bg-green-50 text-green-800 rounded text-sm';
+                } else {
+                    statusEl.innerHTML = '<i class="fa fa-exclamation-circle text-yellow-500 mr-2"></i>后端连接成功但返回非200状态码。';
+                    statusEl.className = 'mb-4 p-3 bg-yellow-50 text-yellow-800 rounded text-sm';
+                }
+            } catch (error) {
+                statusEl.innerHTML = `<i class="fa fa-times-circle text-red-500 mr-2"></i>后端连接失败: ${error.message}`;
+                statusEl.className = 'mb-4 p-3 bg-red-50 text-red-800 rounded text-sm';
+            }
+        });
+
+        // 前端代理测试
+        document.getElementById('test-proxy').addEventListener('click', async function() {
+            const statusEl = document.getElementById('proxy-status');
+            statusEl.innerHTML = '<i class="fa fa-circle-o-notch fa-spin mr-2"></i>正在测试代理...';
+            statusEl.className = 'mb-4 p-3 bg-blue-50 text-blue-800 rounded text-sm';
+            
+            try {
+                // 这里应该使用实际运行的前端端口
+                const response = await fetch('http://localhost:3000/api/');
+                if (response.ok) {
+                    statusEl.innerHTML = '<i class="fa fa-check-circle text-green-500 mr-2"></i>前端代理配置正确！';
+                    statusEl.className = 'mb-4 p-3 bg-green-50 text-green-800 rounded text-sm';
+                } else if (response.status === 404) {
+                    statusEl.innerHTML = '<i class="fa fa-exclamation-circle text-yellow-500 mr-2"></i>代理配置可能正确，但访问的路径不存在。';
+                    statusEl.className = 'mb-4 p-3 bg-yellow-50 text-yellow-800 rounded text-sm';
+                } else {
+                    statusEl.innerHTML = '<i class="fa fa-exclamation-circle text-yellow-500 mr-2"></i>代理连接成功但返回非预期状态码。';
+                    statusEl.className = 'mb-4 p-3 bg-yellow-50 text-yellow-800 rounded text-sm';
+                }
+            } catch (error) {
+                statusEl.innerHTML = `<i class="fa fa-times-circle text-red-500 mr-2"></i>前端代理测试失败: ${error.message}`;
+                statusEl.className = 'mb-4 p-3 bg-red-50 text-red-800 rounded text-sm';
+            }
+        });
+
+        // 股票筛选API测试
+        document.getElementById('test-stock-filter').addEventListener('click', async function() {
+            const statusEl = document.getElementById('api-status');
+            const resultsEl = document.getElementById('results');
+            const resultsContentEl = document.getElementById('results-content');
+            
+            statusEl.innerHTML = '<i class="fa fa-circle-o-notch fa-spin mr-2"></i>正在调用API...';
+            statusEl.className = 'mb-4 p-3 bg-blue-50 text-blue-800 rounded text-sm';
+            
+            try {
+                const response = await fetch('http://localhost:8000/stocks/filter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        area: '',
+                        rsiMin: 0,
+                        rsiMax: 100,
+                        currentRatioMin: 0,
+                        currentRatioMax: 100,
+                        debtRatioMin: 0,
+                        debtRatioMax: 100
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    statusEl.innerHTML = '<i class="fa fa-check-circle text-green-500 mr-2"></i>股票筛选API调用成功！';
+                    statusEl.className = 'mb-4 p-3 bg-green-50 text-green-800 rounded text-sm';
+                    
+                    // 显示结果
+                    resultsEl.classList.remove('hidden');
+                    resultsContentEl.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    statusEl.innerHTML = `<i class="fa fa-exclamation-circle text-yellow-500 mr-2"></i>API调用失败，状态码: ${response.status}`;
+                    statusEl.className = 'mb-4 p-3 bg-yellow-50 text-yellow-800 rounded text-sm';
+                }
+            } catch (error) {
+                statusEl.innerHTML = `<i class="fa fa-times-circle text-red-500 mr-2"></i>API调用异常: ${error.message}`;
+                statusEl.className = 'mb-4 p-3 bg-red-50 text-red-800 rounded text-sm';
+            }
+        });
+    </script>
+</body>
+</html>
