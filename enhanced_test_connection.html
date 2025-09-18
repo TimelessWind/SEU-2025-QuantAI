@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增强版连接测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981',
+                        danger: '#ef4444',
+                        neutral: '#6b7280'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .shadow-custom {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            }
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800 min-h-screen">
+    <div class="container mx-auto px-4 py-12 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-custom p-8 mb-8">
+            <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-center text-primary mb-6">
+                <i class="fa fa-plug mr-2"></i>增强版系统连接测试
+            </h1>
+            
+            <!-- 登录区域 -->
+            <div class="p-5 border border-gray-200 rounded-lg transition-all hover:shadow-md mb-8">
+                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                    <i class="fa fa-sign-in text-primary mr-2"></i>用户登录
+                </h3>
+                <div id="login-status" class="mb-4 p-3 bg-gray-50 rounded text-sm">
+                    <i class="fa fa-info-circle text-blue-500 mr-2"></i>请先登录以获取访问令牌
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="account" class="block text-sm font-medium text-gray-700 mb-1">账号</label>
+                        <input type="text" id="account" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入账号">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                        <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入密码">
+                    </div>
+                </div>
+                <button id="login-button" class="w-full py-2 px-4 bg-primary text-white rounded hover:bg-primary/90 transition-all">
+                    登录
+                </button>
+            </div>
+            
+            <!-- 令牌信息区域 -->
+            <div id="token-info" class="hidden p-5 border border-green-200 rounded-lg bg-green-50 mb-8">
+                <h3 class="text-lg font-semibold mb-3 flex items-center text-green-700">
+                    <i class="fa fa-key mr-2"></i>当前登录信息
+                </h3>
+                <div class="mb-4">
+                    <div class="text-sm font-medium text-gray-700 mb-1">账号:</div>
+                    <div id="logged-account" class="text-sm bg-white p-2 rounded border border-gray-200"></div>
+                </div>
+                <div class="mb-4">
+                    <div class="text-sm font-medium text-gray-700 mb-1">角色:</div>
+                    <div id="logged-role" class="text-sm bg-white p-2 rounded border border-gray-200"></div>
+                </div>
+                <div class="mb-4">
+                    <div class="text-sm font-medium text-gray-700 mb-1">Token:</div>
+                    <div id="jwt-token" class="text-xs bg-white p-2 rounded border border-gray-200 overflow-x-auto break-all"></div>
+                </div>
+                <button id="logout-button" class="w-full py-2 px-4 bg-gray-500 text-white rounded hover:bg-gray-600 transition-all">
+                    退出登录
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="p-5 border border-gray-200 rounded-lg transition-all hover:shadow-md">
+                    <h3 class="text-lg font-semibold mb-3 flex items-center">
+                        <i class="fa fa-server text-primary mr-2"></i>后端连接测试
+                    </h3>
+                    <div id="backend-status" class="mb-4 p-3 bg-gray-50 rounded text-sm">
+                        <i class="fa fa-circle-o-notch fa-spin mr-2"></i>等待测试...
+                    </div>
+                    <button id="test-backend" class="w-full py-2 px-4 bg-primary text-white rounded hover:bg-primary/90 transition-all">
+                        测试后端连接
+                    </button>
+                </div>
+                
+                <div class="p-5 border border-gray-200 rounded-lg transition-all hover:shadow-md">
+                    <h3 class="text-lg font-semibold mb-3 flex items-center">
+                        <i class="fa fa-code-fork text-secondary mr-2"></i>前端代理测试
+                    </h3>
+                    <div id="proxy-status" class="mb-4 p-3 bg-gray-50 rounded text-sm">
+                        <i class="fa fa-circle-o-notch fa-spin mr-2"></i>等待测试...
+                    </div>
+                    <button id="test-proxy" class="w-full py-2 px-4 bg-secondary text-white rounded hover:bg-secondary/90 transition-all">
+                        测试前端代理
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                    <i class="fa fa-database text-neutral mr-2"></i>股票筛选API测试
+                </h3>
+                <div id="api-status" class="mb-4 p-3 bg-gray-50 rounded text-sm">
+                    <i class="fa fa-circle-o-notch fa-spin mr-2"></i>等待测试...
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="rsi-min" class="block text-sm font-medium text-gray-700 mb-1">RSI最小值</label>
+                        <input type="number" id="rsi-min" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="0" value="0">
+                    </div>
+                    <div>
+                        <label for="rsi-max" class="block text-sm font-medium text-gray-700 mb-1">RSI最大值</label>
+                        <input type="number" id="rsi-max" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="100" value="100">
+                    </div>
+                </div>
+                <button id="test-stock-filter" class="w-full py-2 px-4 bg-neutral text-white rounded hover:bg-neutral/90 transition-all" disabled>
+                    请先登录
+                </button>
+            </div>
+        </div>
+        
+        <div id="results" class="hidden bg-white rounded-xl shadow-custom p-8">
+            <h2 class="text-xl font-bold mb-4">测试结果</h2>
+            <pre id="results-content" class="bg-gray-50 p-4 rounded text-sm overflow-x-auto"></pre>
+        </div>
+    </div>
+
+    <script>
+        // 存储当前登录的token和用户信息
+        let currentToken = null;
+        let currentUserInfo = null;
+        
+        // 登录功能
+        document.getElementById('login-button').addEventListener('click', async function() {
+            const account = document.getElementById('account').value;
+            const password = document.getElementById('password').value;
+            const statusEl = document.getElementById('login-status');
+            
+            if (!account || !password) {
+                statusEl.innerHTML = '<i class="fa fa-exclamation-circle text-yellow-500 mr-2"></i>请输入账号和密码';
+                statusEl.className = 'mb-4 p-3 bg-yellow-50 text-yellow-800 rounded text-sm';
+                return;
+            }
+            
+            statusEl.innerHTML = '<i class="fa fa-circle-o-notch fa-spin mr-2"></i>正在登录...';
+            statusEl.className = 'mb-4 p-3 bg-blue-50 text-blue-800 rounded text-sm';
+            
+            try {
+                const response = await fetch('http://localhost:8000/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ account, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentToken = data.token;
+                    currentUserInfo = {
+                        account: data.account,
+                        role: data.role
+                    };
+                    
+                    // 更新UI
+                    document.getElementById('token-info').classList.remove('hidden');
+                    document.getElementById('logged-account').textContent = currentUserInfo.account;
+                    document.getElementById('logged-role').textContent = currentUserInfo.role;
+                    document.getElementById('jwt-token').textContent = currentToken;
+                    document.getElementById('test-stock-filter').disabled = false;
+                    document.getElementById('test-stock-filter').textContent = '测试股票筛选API';
+                    
+                    statusEl.innerHTML = '<i class="fa fa-check-circle text-green-500 mr-2"></i>登录成功！';
+                    statusEl.className = 'mb-4 p-3 bg-green-50 text-green-800 rounded text-sm';
+                } else {
+                    const errorData = await response.json();
+                    statusEl.innerHTML = `<i class="fa fa-exclamation-circle text-red-500 mr-2"></i>登录失败: ${errorData.message}`;
+                    statusEl.className = 'mb-4 p-3 bg-red-50 text-red-800 rounded text-sm';
+                }
+            } catch (error) {
+                statusEl.innerHTML = `<i class="fa fa-times-circle text-red-500 mr-2"></i>登录请求异常: ${error.message}`;
+                statusEl.className = 'mb-4 p-3 bg-red-50 text-red-800 rounded text-sm';
+            }
+        });
+        
+        // 退出登录功能
+        document.getElementById('logout-button').addEventListener('click', function() {
+            currentToken = null;
+            currentUserInfo = null;
+            
+            document.getElementById('token-info').classList.add('hidden');
+            document.getElementById('test-stock-filter').disabled = true;
+            document.getElementById('test-stock-filter').textContent = '请先登录';
+            document.getElementById('login-status').innerHTML = '<i class="fa fa-info-circle text-blue-500 mr-2"></i>请先登录以获取访问令牌';
+            document.getElementById('login-status').className = 'mb-4 p-3 bg-gray-50 rounded text-sm';
+        });
+        
+        // 后端连接测试
+        document.getElementById('test-backend').addEventListener('click', async function() {
+            const statusEl = document.getElementById('backend-status');
+            statusEl.innerHTML = '<i class="fa fa-circle-o-notch fa-spin mr-2"></i>正在连接...';
+            statusEl.className = 'mb-4 p-3 bg-blue-50 text-blue-800 rounded text-sm';
+            
+            try {
+                const response = await fetch('http://localhost:8000/');
+                if (response.ok) {
+                    statusEl.innerHTML = '<i class="fa fa-check-circle text-green-500 mr-2"></i>后端连接成功！';
+                    statusEl.className = 'mb-4 p-3 bg-green-50 text-green-800 rounded text-sm';
+                } else {
+                    statusEl.innerHTML = '<i class="fa fa-exclamation-circle text-yellow-500 mr-2"></i>后端连接成功但返回非200状态码。';
+                    statusEl.className = 'mb-4 p-3 bg-yellow-50 text-yellow-800 rounded text-sm';
+                }
+            } catch (error) {
+                statusEl.innerHTML = `<i class="fa fa-times-circle text-red-500 mr-2"></i>后端连接失败: ${error.message}`;
+                statusEl.className = 'mb-4 p-3 bg-red-50 text-red-800 rounded text-sm';
+            }
+        });
+
+        // 前端代理测试
+        document.getElementById('test-proxy').addEventListener('click', async function() {
+            const statusEl = document.getElementById('proxy-status');
+            statusEl.innerHTML = '<i class="fa fa-circle-o-notch fa-spin mr-2"></i>正在测试代理...';
+            statusEl.className = 'mb-4 p-3 bg-blue-50 text-blue-800 rounded text-sm';
+            
+            try {
+                // 这里应该使用实际运行的前端端口
+                const response = await fetch('http://localhost:3000/api/');
+                if (response.ok) {
+                    statusEl.innerHTML = '<i class="fa fa-check-circle text-green-500 mr-2"></i>前端代理配置正确！';
+                    statusEl.className = 'mb-4 p-3 bg-green-50 text-green-800 rounded text-sm';
+                } else if (response.status === 404) {
+                    statusEl.innerHTML = '<i class="fa fa-exclamation-circle text-yellow-500 mr-2"></i>代理配置可能正确，但访问的路径不存在。';
+                    statusEl.className = 'mb-4 p-3 bg-yellow-50 text-yellow-800 rounded text-sm';
+                } else {
+                    statusEl.innerHTML = '<i class="fa fa-exclamation-circle text-yellow-500 mr-2"></i>代理连接成功但返回非预期状态码。';
+                    statusEl.className = 'mb-4 p-3 bg-yellow-50 text-yellow-800 rounded text-sm';
+                }
+            } catch (error) {
+                statusEl.innerHTML = `<i class="fa fa-times-circle text-red-500 mr-2"></i>前端代理测试失败: ${error.message}`;
+                statusEl.className = 'mb-4 p-3 bg-red-50 text-red-800 rounded text-sm';
+            }
+        });
+
+        // 股票筛选API测试（带token）
+        document.getElementById('test-stock-filter').addEventListener('click', async function() {
+            const statusEl = document.getElementById('api-status');
+            const resultsEl = document.getElementById('results');
+            const resultsContentEl = document.getElementById('results-content');
+            
+            // 获取用户输入的筛选条件
+            const rsiMin = parseFloat(document.getElementById('rsi-min').value) || 0;
+            const rsiMax = parseFloat(document.getElementById('rsi-max').value) || 100;
+            
+            statusEl.innerHTML = '<i class="fa fa-circle-o-notch fa-spin mr-2"></i>正在调用API...';
+            statusEl.className = 'mb-4 p-3 bg-blue-50 text-blue-800 rounded text-sm';
+            
+            try {
+                const response = await fetch('http://localhost:8000/stocks/filter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`  // 添加token
+                    },
+                    body: JSON.stringify({
+                        area: '',
+                        rsiMin: rsiMin,
+                        rsiMax: rsiMax,
+                        currentRatioMin: 0,
+                        currentRatioMax: 100,
+                        debtRatioMin: 0,
+                        debtRatioMax: 100
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    statusEl.innerHTML = '<i class="fa fa-check-circle text-green-500 mr-2"></i>股票筛选API调用成功！';
+                    statusEl.className = 'mb-4 p-3 bg-green-50 text-green-800 rounded text-sm';
+                    
+                    // 显示结果
+                    resultsEl.classList.remove('hidden');
+                    resultsContentEl.textContent = JSON.stringify(data, null, 2);
+                } else if (response.status === 401) {
+                    statusEl.innerHTML = '<i class="fa fa-exclamation-circle text-red-500 mr-2"></i>认证失败，请重新登录。';
+                    statusEl.className = 'mb-4 p-3 bg-red-50 text-red-800 rounded text-sm';
+                } else {
+                    statusEl.innerHTML = `<i class="fa fa-exclamation-circle text-yellow-500 mr-2"></i>API调用失败，状态码: ${response.status}`;
+                    statusEl.className = 'mb-4 p-3 bg-yellow-50 text-yellow-800 rounded text-sm';
+                }
+            } catch (error) {
+                statusEl.innerHTML = `<i class="fa fa-times-circle text-red-500 mr-2"></i>API调用异常: ${error.message}`;
+                statusEl.className = 'mb-4 p-3 bg-red-50 text-red-800 rounded text-sm';
+            }
+        });
+    </script>
+</body>
+</html>
